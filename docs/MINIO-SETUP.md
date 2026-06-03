@@ -1,61 +1,92 @@
-# MinIO setup guide
+# MinIO Setup Guide
 
-MinIO is **S3-compatible** cloud storage that runs **free on your PC** inside Docker.  
-This is the **default** for this project — no AWS account or credit card needed.
+[← Back to README](../README.md)
+
+MinIO is an open-source, **S3-compatible** object store. This project uses MinIO as the **default** storage backend: free to run locally, no AWS account required, and ideal for development and demos.
 
 ---
 
-## Option A — Docker (recommended, already configured)
+## Table of contents
 
-Everything is in `docker-compose.yml`. You only run:
+- [When to use MinIO](#when-to-use-minio)
+- [Option 1: Docker (recommended)](#option-1-docker-recommended)
+- [Option 2: Standalone on Windows](#option-2-standalone-on-windows)
+- [Verification](#verification)
+- [Large file uploads](#large-file-uploads)
+- [Operations](#operations)
+- [MinIO vs AWS S3](#minio-vs-aws-s3)
 
-```powershell
+---
+
+## When to use MinIO
+
+| Use MinIO if… | Consider AWS S3 if… |
+|---------------|---------------------|
+| You want zero cloud cost for demos | You need production AWS infrastructure |
+| You do not have a payment card for AWS | Your assignment requires live AWS |
+| You run everything on your own PC | You need global CDN / AWS ecosystem |
+
+---
+
+## Option 1: Docker (recommended)
+
+The repository ships a complete stack in `docker-compose.yml`.
+
+### Prerequisites
+
+- Docker Desktop installed and running
+
+### Steps
+
+```bash
+git clone <your-repo-url>
 cd secure-file-sharing
+npm run setup
 docker compose up --build
 ```
 
-### What Docker starts
+### Services started
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| **minio** | 9000 (API), 9001 (console) | File storage |
-| **minio-init** | — | Creates bucket `secure-files` |
-| **app** | 3000 | Upload / Download website |
+| Service | Ports | Role |
+|---------|-------|------|
+| `minio` | `9000` (API), `9001` (console) | Object storage |
+| `minio-init` | — | Creates bucket `secure-files` (one-shot) |
+| `app` | `3000` | Web application (HTTPS) |
 
-### URLs
+### Access points
 
-| What | URL |
-|------|-----|
-| Upload page | https://localhost:3000/upload |
-| Download page | https://localhost:3000/download |
-| MinIO console | http://localhost:9001 |
+| Resource | URL |
+|----------|-----|
+| Upload UI | https://localhost:3000/upload |
+| Download UI | https://localhost:3000/download |
+| MinIO Console | http://localhost:9001 |
+| API health | https://localhost:3000/api/health |
 
-**Console login:** `minioadmin` / `minioadmin`
+**Console credentials:** `minioadmin` / `minioadmin`
 
-### `.env` (MinIO defaults)
+### Configuration notes
 
-```env
-AWS_S3_BUCKET=secure-files
-AWS_ACCESS_KEY_ID=minioadmin
-AWS_SECRET_ACCESS_KEY=minioadmin
-S3_ENDPOINT=http://127.0.0.1:9000
-```
-
-Docker **overrides** `S3_ENDPOINT` to `http://minio:9000` for the app container (internal network).
+- **`.env` is not in Git.** Run `npm run setup` after clone to generate it locally.
+- `docker-compose.yml` embeds the same MinIO defaults, so Docker can start even before `.env` exists.
+- Inside Docker, the app connects to MinIO at `http://minio:9000` (internal network).
 
 ---
 
-## Option B — MinIO without Docker (Windows CMD)
+## Option 2: Standalone on Windows
 
-Use this only if you cannot run Docker.
+Use this path only if Docker is unavailable.
 
 ### 1. Download MinIO
 
-https://dl.min.io/server/minio/release/windows-amd64/minio.exe  
+Download the Windows binary:
 
-Save to `C:\minio\minio.exe`
+https://dl.min.io/server/minio/release/windows-amd64/minio.exe
 
-### 2. Start MinIO
+Save as: `C:\minio\minio.exe`
+
+### 2. Start the server
+
+Open **Command Prompt** (not PowerShell syntax for `set`):
 
 ```cmd
 mkdir C:\minio\data
@@ -65,13 +96,22 @@ set MINIO_ROOT_PASSWORD=minioadmin
 minio.exe server C:\minio\data --console-address ":9001"
 ```
 
-Keep this window open.
+Leave this terminal open while MinIO runs.
 
-### 3. Create bucket
+### 3. Create a bucket
 
-Open http://127.0.0.1:9001 → login → **Create bucket** → name: `secure-files`
+1. Open http://127.0.0.1:9001  
+2. Sign in with `minioadmin` / `minioadmin`  
+3. **Create Bucket** → name: `secure-files`
 
-### 4. Configure `.env`
+### 4. Configure the application
+
+```bash
+cd secure-file-sharing
+npm run setup
+```
+
+Ensure `.env` contains:
 
 ```env
 S3_ENDPOINT=http://127.0.0.1:9000
@@ -79,15 +119,11 @@ AWS_REGION=us-east-1
 AWS_S3_BUCKET=secure-files
 AWS_ACCESS_KEY_ID=minioadmin
 AWS_SECRET_ACCESS_KEY=minioadmin
-PORT=3000
-HOST=0.0.0.0
-ENABLE_HTTPS=true
 ```
 
-### 5. Run app (separate terminal)
+### 5. Start the Node.js server
 
-```powershell
-cd secure-file-sharing
+```bash
 npm install
 npm start
 ```
@@ -96,59 +132,77 @@ Open https://localhost:3000/upload
 
 ---
 
-## Verify MinIO works
+## Verification
 
-1. **Health check:** https://localhost:3000/api/health  
+Complete this checklist after setup:
 
-   Expected: `{"ok":true,"storage":"minio","bucket":"secure-files"}`
+- [ ] `GET /api/health` returns `"storage":"minio"` and `"ok":true`
+- [ ] A test file uploads successfully on `/upload`
+- [ ] MinIO Console shows objects under `secure-files/encrypted/`
+- [ ] The same file decrypts on `/download` with the correct password
 
-2. **Upload** a small test file on `/upload`
+**Example health response:**
 
-3. **MinIO console:** bucket `secure-files` → folder `encrypted/` → new object appears
-
-4. **Download** page → select file → decrypt with same password
+```json
+{
+  "ok": true,
+  "storage": "minio",
+  "bucket": "secure-files"
+}
+```
 
 ---
 
-## Large files (100MB+)
+## Large file uploads
 
-The app has **no file size limit**, but the whole encrypted file is loaded in RAM during upload.
+The application does not impose a fixed upload size limit. However, encrypted files are buffered in memory during upload, so the host must have sufficient RAM.
 
-If upload fails or Docker crashes:
+If uploads fail or containers crash (e.g. 100MB+ files):
 
-1. **Docker Desktop** → ensure enough memory  
-2. On **WSL2**, create `C:\Users\YourName\.wslconfig`:
+1. **Docker Desktop** → **Settings** → **Resources** → increase **Memory** (e.g. 4 GB+).
+2. On **WSL2**, create or edit `C:\Users\<YourName>\.wslconfig`:
 
 ```ini
 [wsl2]
 memory=4GB
 processors=4
+swap=2GB
 ```
 
-3. Admin PowerShell: `wsl --shutdown` → restart Docker
+3. Run in an elevated PowerShell:
+
+```powershell
+wsl --shutdown
+```
+
+4. Restart Docker Desktop and run `docker compose up` again.
 
 ---
 
-## Stop / reset
+## Operations
 
-```powershell
-docker compose down
-```
-
-Delete all stored files and volumes:
-
-```powershell
-docker compose down -v
-```
+| Action | Command |
+|--------|---------|
+| Stop containers | `docker compose down` |
+| Stop and delete all data | `docker compose down -v` |
+| Rebuild after code changes | `docker compose up --build` |
 
 ---
 
-## MinIO vs AWS
+## MinIO vs AWS S3
 
-| | MinIO (this guide) | AWS S3 |
-|--|-------------------|--------|
-| Cost | Free local | Free tier / paid |
-| Card | Not required | Usually required |
-| Setup | `docker compose up` | See [AWS-SETUP.md](AWS-SETUP.md) |
+| Criteria | MinIO | AWS S3 |
+|----------|-------|--------|
+| Cost | Free (self-hosted) | Free tier limits, then paid |
+| Account | None | AWS account (card often required) |
+| Setup time | Minutes (Docker) | ~30 minutes (IAM, bucket) |
+| S3 API | Compatible | Native |
+| Guide | This document | [AWS-SETUP.md](AWS-SETUP.md) |
 
+For the Internee.pk task, MinIO satisfies the requirement for **cloud storage with an S3-compatible API**. AWS is optional and documented separately.
 
+---
+
+<p align="center">
+  <sub>Secure File Sharing · MinIO Setup · Ali Hussnain</sub>
+</p>

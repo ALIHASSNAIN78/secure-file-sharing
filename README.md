@@ -22,12 +22,18 @@
 ## Quick start (MinIO + Docker — recommended)
 
 1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-2. Open terminal in project folder:
+2. Clone repo, then in project folder:
 
 ```powershell
 cd secure-file-sharing
+npm run setup
 docker compose up --build
 ```
+
+`npm run setup` creates **`.env` locally** .  
+Docker also works with built-in defaults if you skip setup — setup is for a local `.env` you can edit (e.g. AWS).
+
+**Windows:** `.\setup.ps1` does the same as `npm run setup`.
 
 3. Browser: **https://localhost:3000/upload** (accept certificate warning once)
 4. Upload a file with a password → open **Download** → same password → decrypt
@@ -36,7 +42,12 @@ docker compose up --build
 
 ## Configuration
 
-Single file: **[`.env`](.env)** — read by Docker automatically.
+| File | On GitHub? |
+|------|------------|
+| `.env` | **No** — created by `npm run setup` or `setup.ps1` |
+| `scripts/init-env.js` | Yes — contains default values only |
+
+After clone: `npm run setup` → `.env` appears with MinIO defaults.
 
 Default setup uses **MinIO** inside Docker (no AWS account, no credit card).
 
@@ -67,7 +78,8 @@ secure-file-sharing/
 ├── docker-compose.yml      # MinIO + app (default)
 ├── docker-compose.aws.yml  # App only, for AWS S3
 ├── Dockerfile
-├── .env                  # Config (one file)
+├── scripts/init-env.js   # Creates .env after clone
+├── setup.ps1 / setup.sh
 ├── docs/
 │   ├── MINIO-SETUP.md
 │   └── AWS-SETUP.md

@@ -1,4 +1,4 @@
-# AWS S3 only — no MinIO. Usage:
+# AWS S3 — run after: npm run setup (creates .env with your AWS keys)
 #   docker compose -f docker-compose.aws.yml up --build
 services:
   app:

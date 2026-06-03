@@ -4,6 +4,8 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
+ENV SKIP_ENV_INIT=1
+
 COPY package.json ./
 RUN npm install --omit=dev
 

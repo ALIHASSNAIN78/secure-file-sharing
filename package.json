@@ -4,6 +4,8 @@
   "description": "Docker + MinIO secure file sharing with E2E encryption",
   "type": "module",
   "scripts": {
+    "setup": "node scripts/init-env.js",
+    "postinstall": "node scripts/init-env.js",
     "start": "node server/index.js"
   },
   "engines": {

@@ -28,10 +28,16 @@ services:
     build: .
     ports:
       - "0.0.0.0:3000:3000"
-    env_file:
-      - .env
     environment:
+      PORT: 3000
+      HOST: 0.0.0.0
+      ENABLE_HTTPS: "true"
+      DATA_DIR: /app/data
       S3_ENDPOINT: http://minio:9000
+      AWS_REGION: us-east-1
+      AWS_S3_BUCKET: secure-files
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
     volumes:
       - app_data:/app/data
     depends_on:
