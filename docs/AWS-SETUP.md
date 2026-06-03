@@ -192,7 +192,6 @@ Expected response:
 
 ## Security best practices
 
-- **Never commit `.env`** to Git—it is in `.gitignore` by design.
 - If keys were ever pushed to GitHub, **rotate them immediately** in IAM.
 - Use IAM policies scoped to a single bucket and the `encrypted/` prefix when possible.
 - Client-side encryption ensures S3 never receives plaintext file content.
@@ -235,13 +234,6 @@ See [MINIO-SETUP.md](MINIO-SETUP.md) for details.
 
 ---
 
-## Submission note (Internee.pk)
-
-You may describe your implementation as follows:
-
-> The portal implements end-to-end encryption in the browser and stores ciphertext in S3-compatible object storage. Development and testing use **MinIO** via Docker. The same codebase supports **Amazon S3** for production by updating environment variables and IAM credentials.
-
----
 
 <p align="center">
   <sub>Secure File Sharing · AWS S3 Setup · Ali Hussnain</sub>
