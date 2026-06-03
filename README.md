@@ -25,6 +25,7 @@
 2. Clone repo, then in project folder:
 
 ```powershell
+git clone https://github.com/ALIHASSNAIN78/secure-file-sharing.git
 cd secure-file-sharing
 npm run setup
 docker compose up --build
@@ -39,17 +40,6 @@ Docker also works with built-in defaults if you skip setup — setup is for a lo
 4. Upload a file with a password → open **Download** → same password → decrypt
 
 **Stop:** `docker compose down`
-
-## Configuration
-
-| File | On GitHub? |
-|------|------------|
-| `.env` | **No** — created by `npm run setup` or `setup.ps1` |
-| `scripts/init-env.js` | Yes — contains default values only |
-
-After clone: `npm run setup` → `.env` appears with MinIO defaults.
-
-Default setup uses **MinIO** inside Docker (no AWS account, no credit card).
 
 ## Storage setup guides
 
@@ -117,4 +107,4 @@ secure-file-sharing/
 
 ## Contributor
 
-**Ali Hussnain**
+**ALIHUSSNAIN**
