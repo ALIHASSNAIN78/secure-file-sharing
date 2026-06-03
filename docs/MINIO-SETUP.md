@@ -39,7 +39,7 @@ The repository ships a complete stack in `docker-compose.yml`.
 ### Steps
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/ALIHASSNAIN78/secure-file-sharing.git
 cd secure-file-sharing
 npm run setup
 docker compose up --build
@@ -63,12 +63,6 @@ docker compose up --build
 | API health | https://localhost:3000/api/health |
 
 **Console credentials:** `minioadmin` / `minioadmin`
-
-### Configuration notes
-
-- **`.env` is not in Git.** Run `npm run setup` after clone to generate it locally.
-- `docker-compose.yml` embeds the same MinIO defaults, so Docker can start even before `.env` exists.
-- Inside Docker, the app connects to MinIO at `http://minio:9000` (internal network).
 
 ---
 
@@ -153,31 +147,6 @@ Complete this checklist after setup:
 
 ---
 
-## Large file uploads
-
-The application does not impose a fixed upload size limit. However, encrypted files are buffered in memory during upload, so the host must have sufficient RAM.
-
-If uploads fail or containers crash (e.g. 100MB+ files):
-
-1. **Docker Desktop** → **Settings** → **Resources** → increase **Memory** (e.g. 4 GB+).
-2. On **WSL2**, create or edit `C:\Users\<YourName>\.wslconfig`:
-
-```ini
-[wsl2]
-memory=4GB
-processors=4
-swap=2GB
-```
-
-3. Run in an elevated PowerShell:
-
-```powershell
-wsl --shutdown
-```
-
-4. Restart Docker Desktop and run `docker compose up` again.
-
----
 
 ## Operations
 
