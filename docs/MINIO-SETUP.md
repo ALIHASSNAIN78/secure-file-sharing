@@ -168,8 +168,6 @@ Complete this checklist after setup:
 | S3 API | Compatible | Native |
 | Guide | This document | [AWS-SETUP.md](AWS-SETUP.md) |
 
-For the Internee.pk task, MinIO satisfies the requirement for **cloud storage with an S3-compatible API**. AWS is optional and documented separately.
-
 ---
 
 <p align="center">
