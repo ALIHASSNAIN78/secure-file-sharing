@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload · Secure File Sharing</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="/upload" class="active">Upload</a>
+      <a href="/download">Download</a>
+    </nav>
+    <div class="wrap">
+      <h1>Upload file</h1>
+      <p class="sub">File is encrypted in your browser (AES-256-GCM), then stored in MinIO.</p>
+      <div class="card">
+        <form id="upload-form">
+          <label for="file">Choose file</label>
+          <input id="file" type="file" required />
+
+          <label for="passphrase">Encryption password (needed on Download page)</label>
+          <input id="passphrase" type="password" required autocomplete="new-password" />
+
+          <button type="submit" class="btn">Encrypt &amp; Upload</button>
+        </form>
+        <div id="status" class="status"></div>
+      </div>
+    </div>
+    <script type="module" src="/js/upload.js"></script>
+  </body>
+</html>

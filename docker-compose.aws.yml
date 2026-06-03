@@ -1,0 +1,14 @@
+# AWS S3 only — no MinIO. Usage:
+#   docker compose -f docker-compose.aws.yml up --build
+services:
+  app:
+    build: .
+    ports:
+      - "0.0.0.0:3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - app_data:/app/data
+
+volumes:
+  app_data:
